@@ -18,4 +18,19 @@
 
 <resources>
 
+    <!-- DSD Rate options -->
+    <string-array name="dsd_rate_values">
+        <item>64</item>
+        <item>128</item>
+        <item>256</item>
+        <item>512</item>
+        <item>1024</item>
+    </string-array>
+
+    <!-- DSD Base frequency options -->
+    <string-array name="dsd_base_values">
+        <item>44100</item>
+        <item>48000</item>
+    </string-array>
+
 </resources>

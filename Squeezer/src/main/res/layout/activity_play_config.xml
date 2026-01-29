@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- DSD Rate -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_dsd_rate_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:labelFor="@+id/dsd_rate_spinner" />
+
+        <Spinner
+            android:id="@+id/dsd_rate_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <!-- DSD Convert -->
+        <CheckBox
+            android:id="@+id/dsd_convert_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_dsd_convert_label"
+            android:layout_marginBottom="16dp" />
+
+        <!-- DSD Native -->
+        <CheckBox
+            android:id="@+id/dsd_native_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_dsd_native_label"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ALSA Card -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_alsa_card_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:labelFor="@+id/alsa_card_spinner" />
+
+        <Spinner
+            android:id="@+id/alsa_card_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <!-- DSD Base -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_dsd_base_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:labelFor="@+id/dsd_base_spinner" />
+
+        <Spinner
+            android:id="@+id/dsd_base_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Use MMAP -->
+        <CheckBox
+            android:id="@+id/use_mmap_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_use_mmap_label"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Phase -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_phase_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:labelFor="@+id/phase_edit" />
+
+        <EditText
+            android:id="@+id/phase_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/playconfig_phase_hint"
+            android:inputType="number"
+            android:layout_marginBottom="16dp"
+            android:importantForAutofill="no" />
+
+        <!-- Extreme Mode -->
+        <CheckBox
+            android:id="@+id/extreme_mode_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_extreme_mode_label"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/save" />
+
+    </LinearLayout>
+
+</ScrollView>

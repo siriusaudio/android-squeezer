@@ -18,6 +18,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="first_preferencescreen">
 
+    <Preference
+        android:key="squeezer.playconfig"
+        android:title="@string/settings_playconfig_title"
+        android:summary="@string/settings_playconfig_summary"/>
+
     <uk.org.ngo.squeezer.IntEditTextPreference
         android:key="squeezer.fadeInSecs"
         android:title="@string/settings_fadeinsecs_title"
@@ -164,4 +169,5 @@
             android:summary="%s"/>
 
     </PreferenceCategory>
+
 </PreferenceScreen>

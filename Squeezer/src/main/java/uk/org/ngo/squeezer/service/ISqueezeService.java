@@ -255,4 +255,7 @@ public interface ISqueezeService {
     }
 
     Boolean randomPlayFolder(JiveItem item);
+    
+    /** Request items with a custom command and callback */
+    <T> void requestItems(uk.org.ngo.squeezer.model.SlimCommand command, IServiceItemListCallback<T> callback);
 }

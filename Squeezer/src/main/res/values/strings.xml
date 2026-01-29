@@ -245,6 +245,24 @@
     <string name="download_filename_structure_number_dot_artist_title">Number. Artist - Title</string>
     <string name="NOTIFICATION_DOWNLOAD_MEDIA_SCANNER_ERROR">could not be added to the device\'s media database</string>
 
+    <string name="settings_category_server">Server Settings</string>
+    <string name="settings_playconfig_title">Play Configuration</string>
+    <string name="settings_playconfig_summary">Configure DSD playback, ALSA card, and audio settings</string>
+    
+    <!-- Play Configuration -->
+    <string name="playconfig_dsd_rate_label">DSD Rate</string>
+    <string name="playconfig_dsd_convert_label">DSD Convert</string>
+    <string name="playconfig_dsd_native_label">DSD Native</string>
+    <string name="playconfig_alsa_card_label">ALSA Card</string>
+    <string name="playconfig_alsa_card_hint">e.g., hw:0,0</string>
+    <string name="playconfig_dsd_base_label">DSD Base Frequency</string>
+    <string name="playconfig_use_mmap_label">Use MMAP</string>
+    <string name="playconfig_phase_label">Phase (0-100)</string>
+    <string name="playconfig_phase_hint">0-100</string>
+    <string name="playconfig_extreme_mode_label">Extreme Mode</string>
+    <string name="save">Save</string>
+    <string name="settings_saved">Settings saved successfully</string>
+
     <!-- Download dialog -->
     <string name="download_item">Download %s</string>
     <string name="disable_downloads">Disable downloads</string>

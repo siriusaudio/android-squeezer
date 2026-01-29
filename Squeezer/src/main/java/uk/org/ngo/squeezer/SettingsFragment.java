@@ -90,6 +90,13 @@ public class SettingsFragment  extends PreferenceFragmentCompat implements
         fillDevicePlayerPreferences(preferences);
 
         fillDownloadPreferences(preferences);
+        
+        // Play Configuration preference at root level
+        Preference playConfigPref = requirePreference("squeezer.playconfig");
+        playConfigPref.setOnPreferenceClickListener(preference -> {
+            PlayConfigActivity.show(getActivity());
+            return true;
+        });
     }
 
     private void fillScrobblePreferences(SharedPreferences preferences) {

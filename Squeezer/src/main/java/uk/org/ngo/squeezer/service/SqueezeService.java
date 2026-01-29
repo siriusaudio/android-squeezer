@@ -1509,6 +1509,11 @@ public class SqueezeService extends Service {
             }
             return false;
         }
+        
+        @Override
+        public <T> void requestItems(SlimCommand command, IServiceItemListCallback<T> callback) {
+            SqueezeService.this.requestItems(command, callback);
+        }
     }
 
     private class SqueezerMediaSessionCallback extends MediaSessionCompat.Callback {
