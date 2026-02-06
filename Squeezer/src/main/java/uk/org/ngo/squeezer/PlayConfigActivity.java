@@ -42,15 +42,25 @@ public class PlayConfigActivity extends AppCompatActivity {
     private static class AlsaCard {
         String id;
         String name;
+        String shortId;
         
         AlsaCard(String id, String name) {
             this.id = id;
             this.name = name;
+            this.shortId = null;
+        }
+        
+        AlsaCard(String id, String name, String shortId) {
+            this.id = id;
+            this.name = name;
+            this.shortId = shortId;
         }
         
         @Override
         public String toString() {
-            return name + (id.equals("default") ? "" : " (" + id + ")");
+            if (id.equals("default")) return name;
+            String displayId = shortId != null ? shortId : id;
+            return name + " (" + displayId + ")";
         }
     }
     private static final String TAG = "PlayConfigActivity";
@@ -308,8 +318,9 @@ public class PlayConfigActivity extends AppCompatActivity {
                     JSONObject cardObj = cardsArray.getJSONObject(i);
                     String id = cardObj.getString("id");
                     String name = cardObj.getString("name");
-                    Log.d(TAG, "parseAlsaCards: Adding card: " + name + " (" + id + ")");
-                    alsaCards.add(new AlsaCard(id, name));
+                    String shortId = cardObj.optString("shortId", null);
+                    Log.d(TAG, "parseAlsaCards: Adding card: " + name + " (" + id + "), shortId: " + shortId);
+                    alsaCards.add(new AlsaCard(id, name, shortId));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error parsing ALSA cards JSON", e);
@@ -340,7 +351,9 @@ public class PlayConfigActivity extends AppCompatActivity {
     
     private void setAlsaCardSelection(String cardId) {
         for (int i = 0; i < alsaCards.size(); i++) {
-            if (alsaCards.get(i).id.equals(cardId)) {
+            AlsaCard card = alsaCards.get(i);
+            String compareId = card.shortId != null ? card.shortId : card.id;
+            if (compareId.equals(cardId) || card.id.equals(cardId)) {
                 alsaCardSpinner.setSelection(i);
                 return;
             }
@@ -349,7 +362,8 @@ public class PlayConfigActivity extends AppCompatActivity {
     
     private String getSelectedAlsaCardId() {
         AlsaCard selected = (AlsaCard) alsaCardSpinner.getSelectedItem();
-        return selected != null ? selected.id : "default";
+        if (selected == null) return "default";
+        return selected.shortId != null ? selected.shortId : selected.id;
     }
     
     private void saveConfig() {
