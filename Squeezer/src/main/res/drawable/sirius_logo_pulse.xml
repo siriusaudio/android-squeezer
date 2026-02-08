@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="48dp"
+            android:height="48dp"
+            android:viewportWidth="48"
+            android:viewportHeight="48">
+            <group
+                android:name="sirius_logo"
+                android:pivotX="24"
+                android:pivotY="24"
+                android:scaleX="1"
+                android:scaleY="1">
+                <path
+                    android:name="logo_path"
+                    android:pathData="M24,8C15.163,8 8,15.163 8,24C8,32.837 15.163,40 24,40C32.837,40 40,32.837 40,24C40,15.163 32.837,8 24,8ZM20,16L20,32L16,32L16,16ZM28,16L28,32L24,32L24,16ZM32,20L36,20L36,28L32,28Z"
+                    android:fillColor="#D4AF37"
+                    android:fillAlpha="0.9"/>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="sirius_logo">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:duration="1000"
+                    android:valueFrom="1.0"
+                    android:valueTo="1.2"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate"/>
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:duration="1000"
+                    android:valueFrom="1.0"
+                    android:valueTo="1.2"
+                    android:valueType="floatType"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate"/>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="logo_path">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="fillAlpha"
+                android:duration="1000"
+                android:valueFrom="0.6"
+                android:valueTo="1.0"
+                android:valueType="floatType"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/accelerate_decelerate"/>
+        </aapt:attr>
+    </target>
+</animated-vector>

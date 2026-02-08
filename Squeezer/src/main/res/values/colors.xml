@@ -136,4 +136,10 @@
     <color name="colorAppBarDark">@color/orangeBlack</color>
     <color name="colorAppBarLight">@color/orangeWhite </color>
 
+    <!-- Sirius Gold Colors -->
+    <color name="sirius_gold">#D4AF37</color>
+    <color name="sirius_gold_light">#FFD700</color>
+    <color name="sirius_gold_dark">#B8860B</color>
+    <color name="sirius_gold_transparent">#40D4AF37</color>
+
 </resources>

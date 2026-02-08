@@ -24,12 +24,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
+    <FrameLayout
         android:id="@+id/loading_label"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:visibility="gone"
-        android:indeterminate="true" />
+        android:background="?android:attr/colorBackground"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/loading_logo"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:src="@drawable/sirius_logo_gold"
+            android:contentDescription="@string/app_name"
+            android:scaleType="fitCenter" />
+
+    </FrameLayout>
 
     <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
         android:id="@+id/fastscroller"

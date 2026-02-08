@@ -20,7 +20,10 @@ package uk.org.ngo.squeezer.framework;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
@@ -202,18 +205,37 @@ public abstract class ItemListActivity<VH extends ItemViewHolder<T>, T extends I
         subActivityContent.setVisibility(View.VISIBLE);
         loadingProgress.setVisibility(View.VISIBLE);
         emptyView.setVisibility(View.GONE);
+        
+        // Start pulsing animation on the logo
+        ImageView loadingLogo = loadingProgress.findViewById(R.id.loading_logo);
+        if (loadingLogo != null) {
+            Animation pulseAnim = AnimationUtils.loadAnimation(this, R.anim.pulse_animation);
+            loadingLogo.startAnimation(pulseAnim);
+        }
     }
 
     private void showEmptyView() {
         subActivityContent.setVisibility(View.GONE);
         loadingProgress.setVisibility(View.GONE);
         emptyView.setVisibility(View.VISIBLE);
+        
+        // Stop animation
+        ImageView loadingLogo = loadingProgress.findViewById(R.id.loading_logo);
+        if (loadingLogo != null) {
+            loadingLogo.clearAnimation();
+        }
     }
 
     protected void showContent() {
         subActivityContent.setVisibility(View.VISIBLE);
         loadingProgress.setVisibility(View.GONE);
         emptyView.setVisibility(View.GONE);
+        
+        // Stop animation
+        ImageView loadingLogo = loadingProgress.findViewById(R.id.loading_logo);
+        if (loadingLogo != null) {
+            loadingLogo.clearAnimation();
+        }
     }
 
     /**

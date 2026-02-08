@@ -20,9 +20,13 @@ import android.content.Context;
 import android.os.CountDownTimer;
 import android.text.Editable;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -184,24 +188,22 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
      * Starts scanning for servers.
      */
     private void startNetworkScan() {
-        scanProgress.setVisibility(VISIBLE);
+        View scanContainer = findViewById(R.id.scan_progress_container);
+        ImageView scanLogo = findViewById(R.id.scan_logo);
+        
+        scanContainer.setVisibility(VISIBLE);
+        
+        // Start pulsing animation on the logo
+        if (scanLogo != null) {
+            Animation pulseAnim = AnimationUtils.loadAnimation(getContext(), R.anim.pulse_animation);
+            scanLogo.startAnimation(pulseAnim);
+        }
+        
         serversSpinner_til.setStartIconDrawable(android.R.color.transparent);
         serversSpinner_til.setStartIconOnClickListener(null);
         serversSpinner.setText(R.string.settings_server_scan_progress);
         scanNetworkTask = new ScanNetworkTask(getContext(), this);
         new Thread(scanNetworkTask).start();
-
-        scanProgress.setProgress(0);
-        new CountDownTimer(ScanNetworkTask.DISCOVERY_ATTEMPT_TIMEOUT, 50) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                scanProgress.setProgress((int) (100 * (ScanNetworkTask.DISCOVERY_ATTEMPT_TIMEOUT - millisUntilFinished) / ScanNetworkTask.DISCOVERY_ATTEMPT_TIMEOUT));
-            }
-
-            @Override
-            public void onFinish() {
-            }
-        }.start();
     }
 
     /**
@@ -211,7 +213,16 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     public void onScanFinished(Map<String, String> serverMap) {
         scanNetworkTask = null;
 
-        scanProgress.setVisibility(INVISIBLE);
+        View scanContainer = findViewById(R.id.scan_progress_container);
+        ImageView scanLogo = findViewById(R.id.scan_logo);
+        
+        scanContainer.setVisibility(INVISIBLE);
+        
+        // Stop animation
+        if (scanLogo != null) {
+            scanLogo.clearAnimation();
+        }
+        
         serversSpinner_til.setStartIconDrawable(R.drawable.ic_refresh);
         serversSpinner_til.setStartIconOnClickListener(startNetWorkScan);
 
