@@ -68,7 +68,7 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     private TextInputLayout macLayout;
     private boolean macDirty;
     private EditText macEditText;
-    private ProgressBar scanProgress;
+    private View scanProgress;
 
     private ScanNetworkTask scanNetworkTask;
 

@@ -38,6 +38,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -219,11 +221,14 @@ public class NowPlayingFragment extends Fragment  implements CallStateDialog.Cal
                     return;
                 }
 
-                Preferences.ServerAddress serverAddress = preferences.getServerAddress();
-
                 final View view = LayoutInflater.from(mActivity).inflate(R.layout.connecting, null);
-                final TextView connectingTo = view.findViewById(R.id.connecting_to);
-                connectingTo.setText(getString(R.string.connecting_to_text, serverAddress.serverName()));
+                
+                // Start pulsing animation on the logo
+                final ImageView connectingLogo = view.findViewById(R.id.connecting_logo);
+                if (connectingLogo != null) {
+                    Animation pulseAnim = AnimationUtils.loadAnimation(mActivity, R.anim.pulse_animation);
+                    connectingLogo.startAnimation(pulseAnim);
+                }
 
                 connectingDialog = new MaterialAlertDialogBuilder(mActivity)
                         .setView(view)

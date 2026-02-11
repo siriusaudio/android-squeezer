@@ -50,8 +50,8 @@ Generated launcher icons in all required densities with dark gray background (#2
 #### Color Definitions Added
 **File**: `values/colors.xml`
 ```xml
-<color name="sirius_gold">#D4AF37</color>
-<color name="sirius_gold_light">#FFD700</color>
+<color name="sirius_gold">#C49F27</color>
+<color name="sirius_gold_light">#C49F27</color>
 <color name="sirius_gold_dark">#B8860B</color>
 <color name="sirius_gold_transparent">#40D4AF37</color>
 ```
