@@ -33,4 +33,24 @@
         <item>48000</item>
     </string-array>
 
+    <!-- Convert options -->
+    <string-array name="convert_options_values">
+        <item>Original</item>
+        <item>PCM</item>
+        <item>DSD</item>
+        <item>DoP</item>
+    </string-array>
+
+    <!-- PCM conversion rate options -->
+    <string-array name="pcm_rate_values">
+        <item>44100</item>
+        <item>48000</item>
+        <item>88200</item>
+        <item>96000</item>
+        <item>176400</item>
+        <item>192000</item>
+        <item>352800</item>
+        <item>384000</item>
+    </string-array>
+
 </resources>

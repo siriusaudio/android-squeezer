@@ -25,20 +25,32 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
 
-        <!-- DSD Convert -->
-        <CheckBox
-            android:id="@+id/dsd_convert_check"
+        <!-- Conversion Method -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/playconfig_dsd_convert_label"
+            android:text="@string/playconfig_conversion_method_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:labelFor="@+id/convert_options_spinner" />
+
+        <Spinner
+            android:id="@+id/convert_options_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
 
-        <!-- DSD Native -->
-        <CheckBox
-            android:id="@+id/dsd_native_check"
+        <!-- PCM Conversion Rate -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/playconfig_dsd_native_label"
+            android:text="@string/playconfig_pcm_conversion_rate_label"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:labelFor="@+id/pcm_rate_spinner" />
+
+        <Spinner
+            android:id="@+id/pcm_rate_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
 
         <!-- ALSA Card -->

@@ -251,8 +251,8 @@
     
     <!-- Play Configuration -->
     <string name="playconfig_dsd_rate_label">DSD Rate</string>
-    <string name="playconfig_dsd_convert_label">DSD Convert</string>
-    <string name="playconfig_dsd_native_label">DSD Native</string>
+    <string name="playconfig_conversion_method_label">Conversion Method</string>
+    <string name="playconfig_pcm_conversion_rate_label">PCM Conversion Rate</string>
     <string name="playconfig_alsa_card_label">ALSA Card</string>
     <string name="playconfig_alsa_card_hint">e.g., hw:0,0</string>
     <string name="playconfig_dsd_base_label">DSD Base Frequency</string>

@@ -72,8 +72,8 @@ public class PlayConfigActivity extends AppCompatActivity {
     private boolean configLoaded = false;
     
     private Spinner dsdRateSpinner;
-    private CheckBox dsdConvertCheck;
-    private CheckBox dsdNativeCheck;
+    private Spinner convertOptionsSpinner;
+    private Spinner pcmRateSpinner;
     private Spinner alsaCardSpinner;
     private Spinner dsdBaseSpinner;
     private List<AlsaCard> alsaCards = new ArrayList<>();
@@ -146,8 +146,8 @@ public class PlayConfigActivity extends AppCompatActivity {
     
     private void initializeViews() {
         dsdRateSpinner = findViewById(R.id.dsd_rate_spinner);
-        dsdConvertCheck = findViewById(R.id.dsd_convert_check);
-        dsdNativeCheck = findViewById(R.id.dsd_native_check);
+        convertOptionsSpinner = findViewById(R.id.convert_options_spinner);
+        pcmRateSpinner = findViewById(R.id.pcm_rate_spinner);
         alsaCardSpinner = findViewById(R.id.alsa_card_spinner);
         dsdBaseSpinner = findViewById(R.id.dsd_base_spinner);
         useMmapCheck = findViewById(R.id.use_mmap_check);
@@ -166,6 +166,16 @@ public class PlayConfigActivity extends AppCompatActivity {
                 R.array.dsd_base_values, android.R.layout.simple_spinner_item);
         dsdBaseAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dsdBaseSpinner.setAdapter(dsdBaseAdapter);
+
+        ArrayAdapter<CharSequence> convertOptionsAdapter = ArrayAdapter.createFromResource(this,
+            R.array.convert_options_values, android.R.layout.simple_spinner_item);
+        convertOptionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        convertOptionsSpinner.setAdapter(convertOptionsAdapter);
+
+        ArrayAdapter<CharSequence> pcmRateAdapter = ArrayAdapter.createFromResource(this,
+            R.array.pcm_rate_values, android.R.layout.simple_spinner_item);
+        pcmRateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        pcmRateSpinner.setAdapter(pcmRateAdapter);
     }
     
     private void setupListeners() {
@@ -219,14 +229,20 @@ public class PlayConfigActivity extends AppCompatActivity {
                 setSpinnerValue(dsdRateSpinner, dsdRate);
             }
             
-            if (parameters.containsKey("dsd_convert")) {
-                int dsdConvert = Integer.parseInt(String.valueOf(parameters.get("dsd_convert")));
-                dsdConvertCheck.setChecked(dsdConvert == 1);
+            if (parameters.containsKey("conversion_method")) {
+                String conversionMethod = String.valueOf(parameters.get("conversion_method"));
+                setSpinnerValue(convertOptionsSpinner, conversionMethod);
+            } else if (parameters.containsKey("convert_options")) {
+                String convertOptions = String.valueOf(parameters.get("convert_options"));
+                setSpinnerValue(convertOptionsSpinner, convertOptions);
             }
-            
-            if (parameters.containsKey("dsd_native")) {
-                int dsdNative = Integer.parseInt(String.valueOf(parameters.get("dsd_native")));
-                dsdNativeCheck.setChecked(dsdNative == 1);
+
+            if (parameters.containsKey("pcm_conversion_rate")) {
+                String pcmRate = String.valueOf(parameters.get("pcm_conversion_rate"));
+                setSpinnerValue(pcmRateSpinner, pcmRate);
+            } else if (parameters.containsKey("pcm_rate")) {
+                String pcmRate = String.valueOf(parameters.get("pcm_rate"));
+                setSpinnerValue(pcmRateSpinner, pcmRate);
             }
             
             if (parameters.containsKey("alsa_card")) {
@@ -390,8 +406,8 @@ public class PlayConfigActivity extends AppCompatActivity {
         action.cmd.add("playconfig");
         action.cmd.add("set");
         action.cmd.add("dsd_rate:" + dsdRateSpinner.getSelectedItem().toString());
-        action.cmd.add("dsd_convert:" + (dsdConvertCheck.isChecked() ? "1" : "0"));
-        action.cmd.add("dsd_native:" + (dsdNativeCheck.isChecked() ? "1" : "0"));
+        action.cmd.add("conversion_method:" + convertOptionsSpinner.getSelectedItem().toString());
+        action.cmd.add("pcm_conversion_rate:" + pcmRateSpinner.getSelectedItem().toString());
         action.cmd.add("alsa_card:" + getSelectedAlsaCardId());
         action.cmd.add("dsd_base:" + dsdBaseSpinner.getSelectedItem().toString());
         action.cmd.add("use_mmap:" + (useMmapCheck.isChecked() ? "1" : "0"));
@@ -410,8 +426,8 @@ public class PlayConfigActivity extends AppCompatActivity {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!loading);
         dsdRateSpinner.setEnabled(!loading);
-        dsdConvertCheck.setEnabled(!loading);
-        dsdNativeCheck.setEnabled(!loading);
+        convertOptionsSpinner.setEnabled(!loading);
+        pcmRateSpinner.setEnabled(!loading);
         alsaCardSpinner.setEnabled(!loading);
         dsdBaseSpinner.setEnabled(!loading);
         useMmapCheck.setEnabled(!loading);
