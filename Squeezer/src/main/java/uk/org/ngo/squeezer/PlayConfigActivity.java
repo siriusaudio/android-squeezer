@@ -59,8 +59,13 @@ public class PlayConfigActivity extends AppCompatActivity {
         @Override
         public String toString() {
             if (id.equals("default")) return name;
-            String displayId = shortId != null ? shortId : id;
-            return name + " (" + displayId + ")";
+            // Display name with shortId and the hw:INDEX,0 format
+            String displayName = name;
+            if (shortId != null) {
+                displayName += " (" + shortId + ")";
+            }
+            displayName += " [" + id + "]";
+            return displayName;
         }
     }
     private static final String TAG = "PlayConfigActivity";
@@ -368,10 +373,23 @@ public class PlayConfigActivity extends AppCompatActivity {
     private void setAlsaCardSelection(String cardId) {
         for (int i = 0; i < alsaCards.size(); i++) {
             AlsaCard card = alsaCards.get(i);
-            String compareId = card.shortId != null ? card.shortId : card.id;
-            if (compareId.equals(cardId) || card.id.equals(cardId)) {
+            // Match by hw:INDEX,0 format first, then try legacy formats
+            if (card.id.equals(cardId)) {
                 alsaCardSpinner.setSelection(i);
                 return;
+            }
+            // Backward compatibility: match by shortId (card name like "H20")
+            if (card.shortId != null && card.shortId.equals(cardId)) {
+                alsaCardSpinner.setSelection(i);
+                return;
+            }
+            // Backward compatibility: match by just the index number
+            if (card.id.startsWith("hw:") && card.id.endsWith(",0")) {
+                String cardNum = card.id.substring(3, card.id.length() - 2);
+                if (cardNum.equals(cardId)) {
+                    alsaCardSpinner.setSelection(i);
+                    return;
+                }
             }
         }
     }
@@ -379,7 +397,8 @@ public class PlayConfigActivity extends AppCompatActivity {
     private String getSelectedAlsaCardId() {
         AlsaCard selected = (AlsaCard) alsaCardSpinner.getSelectedItem();
         if (selected == null) return "default";
-        return selected.shortId != null ? selected.shortId : selected.id;
+        // Always return the index (id), not the shortId (name)
+        return selected.id;
     }
     
     private void saveConfig() {
@@ -416,10 +435,48 @@ public class PlayConfigActivity extends AppCompatActivity {
         
         service.action(action);
         
+        // After save completes, restart backend services
+        new android.os.Handler().postDelayed(() -> {
+            restartBackendServices();
+        }, 1000);
+    }
+    
+    private void restartBackendServices() {
+        if (service == null) {
+            setLoading(false);
+            Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Stop sirius_listen_native.service
+        Action.JsonAction stopNativeAction = new Action.JsonAction();
+        stopNativeAction.cmd.add("sudo");
+        stopNativeAction.cmd.add("systemctl");
+        stopNativeAction.cmd.add("stop");
+        stopNativeAction.cmd.add("sirius_listen_native.service");
+        service.action(stopNativeAction);
+        
+        // Stop sirius_listen_pcm.service
+        Action.JsonAction stopPcmAction = new Action.JsonAction();
+        stopPcmAction.cmd.add("sudo");
+        stopPcmAction.cmd.add("systemctl");
+        stopPcmAction.cmd.add("stop");
+        stopPcmAction.cmd.add("sirius_listen_pcm.service");
+        service.action(stopPcmAction);
+        
+        // Restart sirius_player.service
+        Action.JsonAction restartPlayerAction = new Action.JsonAction();
+        restartPlayerAction.cmd.add("sudo");
+        restartPlayerAction.cmd.add("systemctl");
+        restartPlayerAction.cmd.add("restart");
+        restartPlayerAction.cmd.add("sirius_player.service");
+        service.action(restartPlayerAction);
+        
+        // Update UI after services restart
         new android.os.Handler().postDelayed(() -> {
             setLoading(false);
             Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
-        }, 1000);
+        }, 2000);
     }
     
     private void setLoading(boolean loading) {
