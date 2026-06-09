@@ -89,6 +89,22 @@
             android:text="@string/playconfig_use_mmap_label"
             android:layout_marginBottom="16dp" />
 
+        <!-- Use Volume from Play Command -->
+        <CheckBox
+            android:id="@+id/use_volume_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_use_volume_label"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Hold Audio Device -->
+        <CheckBox
+            android:id="@+id/hold_audio_device_check"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/playconfig_hold_audio_device_label"
+            android:layout_marginBottom="16dp" />
+
         <!-- Phase -->
         <TextView
             android:layout_width="match_parent"

@@ -43,6 +43,7 @@ android {
     compileSdk rootProject.compileSdkVersion
 
     defaultConfig {
+        applicationId "com.sirius.player.squeezer"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
 
