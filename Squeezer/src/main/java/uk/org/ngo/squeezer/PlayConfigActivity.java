@@ -83,7 +83,7 @@ public class PlayConfigActivity extends AppCompatActivity {
     private Spinner dsdBaseSpinner;
     private List<AlsaCard> alsaCards = new ArrayList<>();
     private CheckBox useMmapCheck;
-    private CheckBox useVolumeCheck;
+    private CheckBox fixVolumeCheck;
     private CheckBox holdAudioDeviceCheck;
     private EditText phaseEdit;
     private CheckBox extremeModeCheck;
@@ -158,7 +158,7 @@ public class PlayConfigActivity extends AppCompatActivity {
         alsaCardSpinner = findViewById(R.id.alsa_card_spinner);
         dsdBaseSpinner = findViewById(R.id.dsd_base_spinner);
         useMmapCheck = findViewById(R.id.use_mmap_check);
-        useVolumeCheck = findViewById(R.id.use_volume_check);
+        fixVolumeCheck = findViewById(R.id.use_volume_check);
         holdAudioDeviceCheck = findViewById(R.id.hold_audio_device_check);
         phaseEdit = findViewById(R.id.phase_edit);
         extremeModeCheck = findViewById(R.id.extreme_mode_check);
@@ -269,9 +269,11 @@ public class PlayConfigActivity extends AppCompatActivity {
                 useMmapCheck.setChecked(useMmap == 1);
             }
 
-            if (parameters.containsKey("use_volume")) {
-                String useVolume = String.valueOf(parameters.get("use_volume"));
-                useVolumeCheck.setChecked("1".equals(useVolume) || "true".equalsIgnoreCase(useVolume));
+            if (parameters.containsKey("fix_volume") || parameters.containsKey("use_volume")) {
+                String useVolume = String.valueOf(parameters.containsKey("fix_volume")
+                        ? parameters.get("fix_volume")
+                        : parameters.get("use_volume"));
+                fixVolumeCheck.setChecked("1".equals(useVolume) || "true".equalsIgnoreCase(useVolume));
             }
 
             if (parameters.containsKey("hold_audio_device")) {
@@ -444,7 +446,7 @@ public class PlayConfigActivity extends AppCompatActivity {
         action.cmd.add("alsa_card:" + getSelectedAlsaCardId());
         action.cmd.add("dsd_base:" + dsdBaseSpinner.getSelectedItem().toString());
         action.cmd.add("use_mmap:" + (useMmapCheck.isChecked() ? "1" : "0"));
-        action.cmd.add("use_volume:" + (useVolumeCheck.isChecked() ? "1" : "0"));
+        action.cmd.add("fix_volume:" + (fixVolumeCheck.isChecked() ? "1" : "0"));
         action.cmd.add("hold_audio_device:" + (holdAudioDeviceCheck.isChecked() ? "1" : "0"));
         action.cmd.add("phase:" + phaseEdit.getText().toString());
         action.cmd.add("extreme_mode:" + (extremeModeCheck.isChecked() ? "1" : "0"));
@@ -504,7 +506,7 @@ public class PlayConfigActivity extends AppCompatActivity {
         alsaCardSpinner.setEnabled(!loading);
         dsdBaseSpinner.setEnabled(!loading);
         useMmapCheck.setEnabled(!loading);
-        useVolumeCheck.setEnabled(!loading);
+        fixVolumeCheck.setEnabled(!loading);
         holdAudioDeviceCheck.setEnabled(!loading);
         phaseEdit.setEnabled(!loading);
         extremeModeCheck.setEnabled(!loading);

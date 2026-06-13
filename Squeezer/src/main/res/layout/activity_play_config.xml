@@ -89,12 +89,12 @@
             android:text="@string/playconfig_use_mmap_label"
             android:layout_marginBottom="16dp" />
 
-        <!-- Use Volume from Play Command -->
+        <!-- Fix volume at 100% -->
         <CheckBox
             android:id="@+id/use_volume_check"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/playconfig_use_volume_label"
+            android:text="@string/playconfig_fix_volume_label"
             android:layout_marginBottom="16dp" />
 
         <!-- Hold Audio Device -->
