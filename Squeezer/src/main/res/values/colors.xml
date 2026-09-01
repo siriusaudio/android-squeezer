@@ -140,6 +140,7 @@
     <color name="sirius_gold">#D4AF37</color>
     <color name="sirius_gold_light">#FFD700</color>
     <color name="sirius_gold_dark">#B8860B</color>
+    <color name="sirius_gold_selected_dark">#6B4F00</color>
     <color name="sirius_gold_transparent">#40D4AF37</color>
 
 </resources>

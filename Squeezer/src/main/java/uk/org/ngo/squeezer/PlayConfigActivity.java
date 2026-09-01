@@ -465,6 +465,10 @@ public class PlayConfigActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
             return;
         }
+
+        if (service.getActivePlayer() != null) {
+            service.stop();
+        }
         
         // Stop sirius_listen_native.service
         Action.JsonAction stopNativeAction = new Action.JsonAction();

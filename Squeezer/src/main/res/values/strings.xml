@@ -33,7 +33,9 @@
     <string name="activity_settings_name">Settings</string>
     <string name="settings_serveraddr_hint">Name or IP address of server</string>
     <string name="settings_manual_server_addr">Manually enter address</string>
-    <string name="settings_server_prompt">Choose a server</string>
+    <string name="settings_server_prompt">Available servers</string>
+    <string name="settings_server_refresh_scan">Refresh scan</string>
+    <string name="settings_server_scan_empty">No servers found on the local network</string>
     <string name="settings_theme_title">Theme</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_light">Light</string>

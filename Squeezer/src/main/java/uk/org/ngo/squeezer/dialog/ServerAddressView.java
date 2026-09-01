@@ -17,14 +17,13 @@
 package uk.org.ngo.squeezer.dialog;
 
 import android.content.Context;
-import android.os.CountDownTimer;
 import android.text.Editable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,12 +55,22 @@ import uk.org.ngo.squeezer.util.ScanNetworkTask;
  * A new network scan can be initiated manually if desired.
  */
 public class ServerAddressView extends LinearLayout implements ScanNetworkTask.ScanNetworkCallback {
+    private static final class DiscoveredServer {
+        final String name;
+        final String address;
+        final String label;
+
+        DiscoveredServer(String name, String address) {
+            this.name = name;
+            this.address = address;
+            this.label = name + " (" + address + ")";
+        }
+    }
+
     private Preferences preferences;
     private Preferences.ServerAddress serverAddress;
 
-    private AutoCompleteTextView serverAddressEditText;
-    private TextInputLayout serversSpinner_til;
-    private AutoCompleteTextView serversSpinner;
+    private EditText serverAddressEditText;
     private EditText userNameEditText;
     private EditText passwordEditText;
     private MaterialCheckBox wakeOnLan;
@@ -69,14 +78,13 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
     private boolean macDirty;
     private EditText macEditText;
     private View scanProgress;
+    private LinearLayout visibleServersContainer;
+    private View refreshScanButton;
+    private String selectedServerAddress;
 
     private ScanNetworkTask scanNetworkTask;
 
-    /** Map server names to IP addresses. */
-    private Map<String, String> discoveredServers;
-
-    private boolean isManual;
-    private OnClickListener startNetWorkScan;
+    private List<DiscoveredServer> discoveredServers;
 
     public ServerAddressView(final Context context) {
         super(context);
@@ -102,7 +110,6 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
                 }
 
                 serverAddressEditText = findViewById(R.id.server_address);
-                serverAddressEditText.setAdapter(new ArrayAdapter<>(getContext(), R.layout.dropdown_item, preferences.getServerHistory()));
                 userNameEditText = findViewById(R.id.username);
                 passwordEditText = findViewById(R.id.password);
 
@@ -133,18 +140,12 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
                 });
 
                 scanProgress = findViewById(R.id.scan_progress);
-
-                // Set up the servers spinner.
-                serversSpinner_til = findViewById(R.id.found_servers_til);
-                serversSpinner = findViewById(R.id.found_servers);
-                serversSpinner.setAdapter(new ArrayAdapter<>(getContext(), R.layout.dropdown_item));
-
-                setEditServerAddressAvailability();
+                visibleServersContainer = findViewById(R.id.visible_servers_container);
+                refreshScanButton = findViewById(R.id.refresh_scan_button);
+                refreshScanButton.setOnClickListener(view -> startNetworkScan());
                 setServerAddress(serverAddress.localAddress());
 
                 startNetworkScan();
-                startNetWorkScan = v -> startNetworkScan();
-                serversSpinner_til.setStartIconOnClickListener(startNetWorkScan);
             });
         }
     }
@@ -192,16 +193,23 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
         ImageView scanLogo = findViewById(R.id.scan_logo);
         
         scanContainer.setVisibility(VISIBLE);
+        refreshScanButton.setEnabled(false);
         
         // Start pulsing animation on the logo
         if (scanLogo != null) {
             Animation pulseAnim = AnimationUtils.loadAnimation(getContext(), R.anim.pulse_animation);
             scanLogo.startAnimation(pulseAnim);
         }
-        
-        serversSpinner_til.setStartIconDrawable(android.R.color.transparent);
-        serversSpinner_til.setStartIconOnClickListener(null);
-        serversSpinner.setText(R.string.settings_server_scan_progress);
+
+        visibleServersContainer.removeAllViews();
+        TextView loading = new TextView(getContext());
+        loading.setText(R.string.settings_server_scan_progress);
+        int padding = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                8,
+                getResources().getDisplayMetrics());
+        loading.setPadding(padding, padding, padding, padding);
+        visibleServersContainer.addView(loading);
         scanNetworkTask = new ScanNetworkTask(getContext(), this);
         new Thread(scanNetworkTask).start();
     }
@@ -222,41 +230,32 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
         if (scanLogo != null) {
             scanLogo.clearAnimation();
         }
-        
-        serversSpinner_til.setStartIconDrawable(R.drawable.ic_refresh);
-        serversSpinner_til.setStartIconOnClickListener(startNetWorkScan);
+        refreshScanButton.setEnabled(true);
 
-        discoveredServers = serverMap;
+        discoveredServers = new ArrayList<>();
+        for (Entry<String, String> entry : serverMap.entrySet()) {
+            DiscoveredServer discoveredServer = new DiscoveredServer(entry.getKey(), entry.getValue());
+            discoveredServers.add(discoveredServer);
+        }
 
-        List<String> keys = new ArrayList<>(discoveredServers.keySet());
-        keys.add(getContext().getString(R.string.settings_manual_server_addr));
-        serversSpinner.setAdapter(new ArrayAdapter<>(getContext(), R.layout.dropdown_item, keys));
+        renderVisibleServers();
 
         // First look for the stored server name in the list of found servers
-        String addressOfStoredServerName = discoveredServers.get(serverAddress.serverName());
+        String addressOfStoredServerName = getServerAddress(serverAddress.serverName());
         int position = getServerPosition(addressOfStoredServerName);
 
         // If that fails, look for the stored server address in the list of found servers
-        if (position < 0) {
-            position = getServerPosition(serverAddress.localAddress());
-        }
+        if (position < 0) position = getServerPosition(serverAddress.localAddress());
 
-        // This shouldn't happen, but crash reports say that it does
-        if (keys.size() > 0) {
-            serversSpinner.setText(keys.get(position < 0 ? keys.size() - 1 : position), false);
+        if (position >= 0 && position < discoveredServers.size()) {
+            setServerAddress(discoveredServers.get(position).address);
+        } else {
+            renderVisibleServers();
         }
-        isManual = (position < 0);
-        setEditServerAddressAvailability();
-
-        serversSpinner.setOnItemClickListener((parent, view, pos, id) -> {
-            String serverAddress = discoveredServers.get((String) ((TextView)view).getText());
-            isManual = (pos == parent.getCount() - 1);
-            setEditServerAddressAvailability();
-            setServerAddress(serverAddress);
-        });
     }
 
     private void setServerAddress(String address) {
+        selectedServerAddress = address;
         serverAddress = preferences.getServerAddress(address);
 
         serverAddressEditText.setText(serverAddress.localAddress());
@@ -265,34 +264,106 @@ public class ServerAddressView extends LinearLayout implements ScanNetworkTask.S
         wakeOnLan.setChecked(serverAddress.wakeOnLan);
         macLayout.setVisibility(serverAddress.wakeOnLan ? VISIBLE : GONE);
         macEditText.setText(Util.formatMac(serverAddress.mac));
+
+        if (discoveredServers != null) {
+            renderVisibleServers();
+        }
     }
 
-    private void setEditServerAddressAvailability() {
+    private void renderVisibleServers() {
+        visibleServersContainer.removeAllViews();
+
         if (discoveredServers == null || discoveredServers.isEmpty()) {
-            serverAddressEditText.setEnabled(true);
-        } else {
-            serverAddressEditText.setEnabled(isManual);
+            TextView empty = new TextView(getContext());
+            empty.setText(R.string.settings_server_scan_empty);
+            int padding = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    8,
+                    getResources().getDisplayMetrics());
+            empty.setPadding(padding, padding, padding, padding);
+            visibleServersContainer.addView(empty);
+            return;
+        }
+
+        int horizontalPadding = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                14,
+                getResources().getDisplayMetrics());
+        int verticalPadding = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                12,
+                getResources().getDisplayMetrics());
+
+        for (DiscoveredServer discoveredServer : discoveredServers) {
+            LinearLayout serverRow = new LinearLayout(getContext());
+            serverRow.setOrientation(LinearLayout.VERTICAL);
+            serverRow.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
+            serverRow.setBackgroundResource(R.drawable.server_choice_frame);
+            serverRow.setClickable(true);
+            serverRow.setFocusable(true);
+            serverRow.setSelected(discoveredServer.address.equals(selectedServerAddress));
+            serverRow.setOnClickListener(view -> setServerAddress(discoveredServer.address));
+
+            LayoutParams rowLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+            rowLayoutParams.bottomMargin = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    8,
+                    getResources().getDisplayMetrics());
+            serverRow.setLayoutParams(rowLayoutParams);
+
+            TextView nameView = new TextView(getContext());
+            nameView.setText(discoveredServer.name);
+            nameView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+            nameView.setTypeface(nameView.getTypeface(), android.graphics.Typeface.BOLD);
+
+            TextView addressView = new TextView(getContext());
+            addressView.setText(discoveredServer.address);
+            addressView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            addressView.setPadding(0, verticalPadding / 3, 0, 0);
+
+            serverRow.addView(nameView);
+            serverRow.addView(addressView);
+            visibleServersContainer.addView(serverRow);
         }
     }
 
     private String getServerName(String ipPort) {
-        if (discoveredServers != null)
-            for (Entry<String, String> entry : discoveredServers.entrySet())
-                if (ipPort.equals(entry.getValue()))
-                    return entry.getKey();
+        if (ipPort == null || discoveredServers == null) {
+            return null;
+        }
+
+        for (DiscoveredServer discoveredServer : discoveredServers) {
+            if (ipPort.equals(discoveredServer.address)) {
+                return discoveredServer.name;
+            }
+        }
         return null;
     }
 
     private int getServerPosition(String host) {
-        if (host != null && discoveredServers != null) {
-            int position = 0;
-            for (Entry<String, String> entry : discoveredServers.entrySet()) {
-                if (host.equals(entry.getValue()))
-                    return position;
-                position++;
+        if (host == null || discoveredServers == null) {
+            return -1;
+        }
+
+        for (int position = 0; position < discoveredServers.size(); position++) {
+            if (host.equals(discoveredServers.get(position).address)) {
+                return position;
             }
         }
         return -1;
+    }
+
+    private String getServerAddress(String serverName) {
+        if (serverName == null || discoveredServers == null) {
+            return null;
+        }
+
+        for (DiscoveredServer discoveredServer : discoveredServers) {
+            if (serverName.equals(discoveredServer.name)) {
+                return discoveredServer.address;
+            }
+        }
+        return null;
     }
 
 }

@@ -13,6 +13,10 @@ Options:
   --serial <serial>    Install to a specific adb device
   --no-build           Skip Gradle build, only install existing APK
   -h, --help           Show this help
+
+Environment:
+  JAVA_HOME            Optional JDK to use for Gradle builds (must contain bin/javac)
+  ADB_BIN              Optional adb binary to use for install
 EOF
 }
 
@@ -57,16 +61,181 @@ done
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
+read_local_sdk_dir() {
+  local sdk_dir=""
+
+  if [[ -f "${SCRIPT_DIR}/local.properties" ]]; then
+    sdk_dir="$(sed -n 's/^sdk\.dir=//p' "${SCRIPT_DIR}/local.properties" | head -n 1)"
+    sdk_dir="${sdk_dir//\\:/:}"
+    sdk_dir="${sdk_dir//\\\\/\\}"
+  fi
+
+  if [[ -n "$sdk_dir" ]]; then
+    printf '%s\n' "$sdk_dir"
+  fi
+}
+
+resolve_android_sdk() {
+  local candidate=""
+  local -a sdk_candidates=()
+
+  if [[ -n "${ANDROID_SDK_ROOT:-}" && -d "${ANDROID_SDK_ROOT}" ]]; then
+    printf '%s\n' "$ANDROID_SDK_ROOT"
+    return 0
+  fi
+
+  if [[ -n "${ANDROID_HOME:-}" && -d "${ANDROID_HOME}" ]]; then
+    printf '%s\n' "$ANDROID_HOME"
+    return 0
+  fi
+
+  candidate="$(read_local_sdk_dir || true)"
+  if [[ -n "$candidate" && -d "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  for candidate in \
+    "$HOME/Android/Sdk" \
+    "$HOME/Android/sdk" \
+    "/opt/android-sdk" \
+    "/usr/lib/android-sdk"
+  do
+    if [[ -d "$candidate" ]]; then
+      sdk_candidates+=("$candidate")
+    fi
+  done
+
+  if [[ ${#sdk_candidates[@]} -gt 0 ]]; then
+    printf '%s\n' "${sdk_candidates[0]}"
+    return 0
+  fi
+
+  return 1
+}
+
+resolve_adb() {
+  local candidate=""
+  local sdk_dir=""
+  local -a adb_candidates=()
+
+  if [[ -n "${ADB_BIN:-}" && -x "${ADB_BIN}" ]]; then
+    printf '%s\n' "$ADB_BIN"
+    return 0
+  fi
+
+  if command -v adb >/dev/null 2>&1; then
+    command -v adb
+    return 0
+  fi
+
+  sdk_dir="$(resolve_android_sdk || true)"
+  if [[ -n "$sdk_dir" ]]; then
+    adb_candidates+=("${sdk_dir}/platform-tools/adb")
+  fi
+
+  candidate="$(read_local_sdk_dir || true)"
+  if [[ -n "$candidate" ]]; then
+    adb_candidates+=("${candidate}/platform-tools/adb")
+  fi
+
+  for sdk_dir in \
+    "${ANDROID_SDK_ROOT:-}" \
+    "${ANDROID_HOME:-}" \
+    "$HOME/Android/Sdk" \
+    "$HOME/Android/sdk" \
+    "/opt/android-sdk" \
+    "/usr/lib/android-sdk"
+  do
+    if [[ -n "$sdk_dir" ]]; then
+      adb_candidates+=("${sdk_dir}/platform-tools/adb")
+    fi
+  done
+
+  for candidate in "${adb_candidates[@]}"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+resolve_java_home() {
+  local candidate=""
+  local -a java_homes=()
+
+  if [[ -n "${JAVA_HOME:-}" && -x "${JAVA_HOME}/bin/javac" ]]; then
+    printf '%s\n' "$JAVA_HOME"
+    return 0
+  fi
+
+  if command -v javac >/dev/null 2>&1; then
+    candidate="$(readlink -f "$(command -v javac)")"
+    candidate="$(dirname "$(dirname "$candidate")")"
+    if [[ -x "$candidate/bin/javac" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  fi
+
+  for candidate in \
+    "/usr/lib/jvm/default-java" \
+    "/usr/lib/jvm/java-21-openjdk-amd64" \
+    "/usr/lib/jvm/java-17-openjdk-amd64" \
+    "/usr/lib/jvm/java-11-openjdk-amd64" \
+    "$HOME/android-studio/jbr" \
+    "$HOME/Android/android-studio/jbr" \
+    "/opt/android-studio/jbr" \
+    "/snap/android-studio/current/android-studio/jbr"
+  do
+    if [[ -n "$candidate" && -x "$candidate/bin/javac" ]]; then
+      java_homes+=("$candidate")
+    fi
+  done
+
+  if [[ ${#java_homes[@]} -gt 0 ]]; then
+    printf '%s\n' "${java_homes[0]}"
+    return 0
+  fi
+
+  return 1
+}
+
 GRADLE_TASK=":Squeezer:assemble${BUILD_VARIANT}"
 APK_DIR="Squeezer/build/outputs/apk/${BUILD_TYPE}"
 
+ANDROID_SDK_ROOT="$(resolve_android_sdk || true)"
+if [[ -n "$ANDROID_SDK_ROOT" ]]; then
+  export ANDROID_SDK_ROOT
+  export ANDROID_HOME="$ANDROID_SDK_ROOT"
+fi
+
 if [[ "$DO_BUILD" -eq 1 ]]; then
+  JAVA_HOME="$(resolve_java_home || true)"
+  if [[ -z "$JAVA_HOME" ]]; then
+    echo "Could not find a JDK with javac for Gradle." >&2
+    echo "Install a full JDK (for example OpenJDK 17 or 21) or set JAVA_HOME to a JDK path." >&2
+    exit 1
+  fi
+
+  if [[ -z "$ANDROID_SDK_ROOT" ]]; then
+    echo "Could not find Android SDK." >&2
+    echo "Set ANDROID_SDK_ROOT or ANDROID_HOME, or create local.properties with sdk.dir=/path/to/sdk." >&2
+    exit 1
+  fi
+
+  export JAVA_HOME
+  export PATH="$JAVA_HOME/bin:$PATH"
+
   echo "Building ${BUILD_TYPE} APK with Gradle task ${GRADLE_TASK}..."
   ./gradlew "$GRADLE_TASK"
 fi
 
-if ! command -v adb >/dev/null 2>&1; then
-  echo "adb not found in PATH. Install Android platform-tools and retry." >&2
+ADB_BIN="$(resolve_adb || true)"
+if [[ -z "$ADB_BIN" ]]; then
+  echo "Could not find adb. Set ADB_BIN, ANDROID_SDK_ROOT, or ANDROID_HOME, or install Android platform-tools." >&2
   exit 1
 fi
 
@@ -87,7 +256,7 @@ if [[ -n "$DEVICE_SERIAL" ]]; then
 fi
 
 adb_cmd() {
-  adb "${ADB_ARGS[@]}" "$@"
+  "$ADB_BIN" "${ADB_ARGS[@]}" "$@"
 }
 
 echo "Installing APK: ${APK_PATH}"
